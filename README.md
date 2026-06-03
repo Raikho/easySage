@@ -8,7 +8,7 @@ Can use this AutoHotKey tool to input bulk data into a program like Sage, where 
 
 **Features:**
 * Captures clipboard content when
-** Pressing "CTRL+C"
-** Pressing "Refresh button" on GUI app
+   * Pressing "CTRL+C"
+   * Pressing "Refresh button" on GUI app
 * After capturing, display Clipboard Content (cleaned up for spaces, commas, and dollar signs)
 * Upon pressing F5, will use AHK to paste that content one field at a time, with "TAB" commands inbetween
