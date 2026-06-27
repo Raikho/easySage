@@ -10,23 +10,25 @@ WINDOW_Y := 0
 ;==================================== GUI =====================================
 ;==============================================================================
 
-myGui := Gui("+0x40000") ; resizable
+WinSetTransparent(250, myGui)
 myGui.MarginX := 10
 myGui.MarginY := 10
 MyGui.SetFont(, "Arial")
 myGui.SetFont(, "Verdana")
 
-myGui.SetFont("s18")
-text1 := myGui.AddText("x10", "F5:")
-text1.SetFont("Bold c3399FF")
-myGui.SetFont("s9")
-text2 := myGui.AddText("yp w205 r2", "paste clipboard with [Tab]s inbetween each value")
+myGui.SetFont("s8")
 
-myGui.SetFont("s18")
-text3 := myGui.AddText("x10 yp+45 c3399FF", "F8:")
-text3.SetFont("Bold c3399FF")
-myGui.SetFont("s9")
-text4 := myGui.AddText("yp w205 r2", "paste clipboard with [Down]s inbetween each value")
+;==== First Button
+btn1 := myGui.AddButton("w60 h30 Section", "Tab Data")
+btn1.OnEvent("Click", (*) => pasteClipboard("{tab}"))
+text1 := myGui.AddText("yp w180 r2", "paste clipboard with [Tab]s inbetween each value")
+
+;==== Second Button
+btn2 := myGui.AddButton("xs w60 h30 Section", "Down Data")
+btn2.OnEvent("Click", (*) => pasteClipboard("{down}"))
+text1 := myGui.AddText("yp w180 r2", "paste clipboard with [Down Key]s inbetween each value")
+
+
 
 myGui.SetFont("s8")
 myBtn := myGui.AddButton("x190 y100 w65 h35 Section", "Read Clipboard")
@@ -39,7 +41,7 @@ myGui.SetFont("s10")
 editBox := myGui.AddEdit("xs+0 ys+28 Multi ReadOnly VScroll HScroll w250 h200", "")
 editBox.Opt("BackgroundBFDBFE")
 
-myGui.OnEvent("Close", (*) => ExitApp)
+myGui.OnEvent("Close", (*) => ExitApp())
 myGui.Show(Format("w{1} h{2} x{3} y{4}", WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_X, WINDOW_Y))
 
 ;==============================================================================
@@ -47,9 +49,6 @@ myGui.Show(Format("w{1} h{2} x{3} y{4}", WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_X, 
 ;==============================================================================
 
 OnClipboardChange clipChanged
-
-$F5::pasteClipboard("{tab}")
-$F8::pasteClipboard("{down}")
 
 ;==============================================================================
 ;================================= FUNCTIONS ==================================
@@ -70,6 +69,7 @@ printClipboard(*) {
 }
 
 pasteClipboard(key) {
+	copy := editBox.Value
 	arr := StrSplit(editBox.Value, [A_TAB, "`n"])
 	for field in arr {
 		if GetKeyState("ESC", "P")
@@ -81,4 +81,5 @@ pasteClipboard(key) {
 		Send(key)
 		Sleep(10)
 	}
+	editBox.Value := copy
 }
