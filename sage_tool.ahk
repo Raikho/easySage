@@ -10,6 +10,7 @@ WINDOW_Y := 0
 ;==================================== GUI =====================================
 ;==============================================================================
 
+myGui := Gui("+0x40000 +E0x08000000 +ToolWindow +AlwaysOnTop +Resize") ; resizable
 WinSetTransparent(250, myGui)
 myGui.MarginX := 10
 myGui.MarginY := 10
@@ -49,6 +50,7 @@ myGui.Show(Format("w{1} h{2} x{3} y{4}", WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_X, 
 ;==============================================================================
 
 OnClipboardChange clipChanged
+myGui.OnEvent("Size", onWindowResized)
 
 ;==============================================================================
 ;================================= FUNCTIONS ==================================
@@ -60,6 +62,11 @@ clipChanged(DataType) {
 		return
 	}
 	printClipboard()
+}
+
+onWindowResized(guiObject, eventInfo, width, height) {
+	editBox.GetPos(&x, &y)
+	editBox.Move(x, y, width - x - 20, height - y - 10)
 }
 
 printClipboard(*) {
