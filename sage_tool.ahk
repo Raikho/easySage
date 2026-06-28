@@ -1,8 +1,9 @@
 #Requires AutoHotkey v2.0
 #SingleInstance force
 
-WINDOW_WIDTH := 265
+WINDOW_WIDTH := 285
 WINDOW_HEIGHT := 355
+TAB_HEIGHT := 150
 WINDOW_X := 0
 WINDOW_Y := 0
 
@@ -17,28 +18,37 @@ myGui.MarginY := 10
 MyGui.SetFont(, "Arial")
 myGui.SetFont(, "Verdana")
 
-myGui.SetFont("s8")
+myTabs := myGui.Add("Tab3", "w" . WINDOW_WIDTH - 20 . " h" . TAB_HEIGHT, ["main", ""])
+myTabs.UseTab(1)
 
 ;==== First Button
-btn1 := myGui.AddButton("w60 h30 Section", "Tab Data")
+myGui.SetFont("s8 bold cBlack")
+btn1 := myGui.AddButton("w70 h30 Section", "Tab Data")
 btn1.OnEvent("Click", (*) => pasteClipboard("{tab}"))
+
+myGui.SetFont("s8 norm cBlue")
 text1 := myGui.AddText("yp w180 r2", "paste clipboard with [Tab]s inbetween each value")
 
 ;==== Second Button
-btn2 := myGui.AddButton("xs w60 h30 Section", "Down Data")
+myGui.SetFont("s8 bold cBlack")
+btn2 := myGui.AddButton("xs w70 h30 Section", "Down Data")
 btn2.OnEvent("Click", (*) => pasteClipboard("{down}"))
-text1 := myGui.AddText("yp w180 r2", "paste clipboard with [Down Key]s inbetween each value")
+
+myGui.SetFont("s7 norm cBlue")
+text1 := myGui.AddText("yp w180 r2", "paste clipboard with [DownKey]s inbetween each value")
+
+myTabs.UseTab()
 
 
-myGui.SetFont("s8")
-myBtn := myGui.AddButton("x190 y100 w65 h35 Section", "Read Clipboard")
+myGui.SetFont("s6 cBlack")
+myBtn := myGui.AddButton("x200 y140 w55 h25 Section y" . TAB_HEIGHT + 15, "Read Clipboard")
 myBtn.OnEvent("Click", printClipboard)
 
 myGui.SetFont("s12")
-myGui.AddText("x5 ys+15 Section", "Clipboard contents:")
+myGui.AddText("x5 yp+5 Section", "Clipboard contents:")
 
 myGui.SetFont("s10")
-editBox := myGui.AddEdit("xs+0 ys+28 Multi ReadOnly VScroll HScroll w250 h185", "")
+editBox := myGui.AddEdit("xs+0 y+0 Multi ReadOnly VScroll HScroll w270 h140", "")
 editBox.Opt("BackgroundBFDBFE")
 
 statusBar := mygui.AddStatusBar()
@@ -77,6 +87,8 @@ onClipChanged(DataType) {
 onWindowResized(guiObject, eventInfo, width, height) {
 	editBox.GetPos(&x, &y)
 	editBox.Move(x, y, width - x - 10, height - y - 27)
+	MyTabs.GetPos(&tx, &ty)
+	MyTabs.Move(tx, ty, width - 20)
 }
 
 printClipboard(*) {
@@ -100,7 +112,7 @@ refreshStats(*) {
 	num_rows := lines.Length
 	num_cols := max_tabs + 1
 
-	statusBar.SetText("  " . num_rows . "r x " . num_cols . "c")
+	statusBar.SetText("  " . num_rows . " rows x " . num_cols . " cols")
 }
 
 pasteClipboard(key) {
