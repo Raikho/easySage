@@ -72,6 +72,9 @@ btn3.OnEvent("Click", onEnterOrderData)
 myGui.SetFont("s8 norm cBlue")
 text3 := myGui.AddText("yp w150 r2", "testing out entering order data")
 
+progressBar := myGui.AddProgress("xs ys+30 w200 h10")
+progressBar.Visible := false
+
 myGui.SetFont("s9 bold c075985")
 capturedText := myGui.AddText("xs w200 h100 r4 +Right", "")
 
@@ -102,6 +105,7 @@ getStartingClipboard()
 OnClipboardChange onClipChanged
 myGui.OnEvent("Size", onWindowResized)
 myGui.OnEvent("Close", (*) => ExitApp())
+
 
 ;==============================================================================
 ;================================= FUNCTIONS ==================================
@@ -198,6 +202,9 @@ pasteClipboard(key) {
 }
 
 onEnterOrderData(*) {
+	progressBar.Value := 10
+	progressBar.Visible := true
+	
 	for index, item in orderData {
 		if GetKeyState("ESC", "P")
 			break
@@ -210,10 +217,16 @@ onEnterOrderData(*) {
 		}
 		Sleep(200)
 		if(item.name = "Customer No") {
-			sleep(1000)
+			sleep(300)
+			progressBar.Value := 20
+			sleep(300)
+			progressBar.value := 30
+			sleep(300)
 		}
 		if(FALSE) {
 			Sleep(500)
 		}
+		progressBar.Value := 30 + 70 * (index / orderData.Length)
 	}
+	progressBar.Visible := false
 }
