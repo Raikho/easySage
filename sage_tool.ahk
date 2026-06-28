@@ -7,18 +7,45 @@ TAB_HEIGHT := 150
 WINDOW_X := 0
 WINDOW_Y := 0
 
+orderData := [
+	{ value: "", name: "Customer No", regex: "cust(omer)?" },
+	{ value: "", name: "Inquiry", regex: "Inquiry" },
+	{ value: "", name: "Last Shipment", regex: "Last Shipment" },
+	{ value: "", name: "Last Invoice", regex: "Last Invoice" },
+	{ value: "", name: "Template Code", regex: "Template Code" },
+	{ value: "", name: "PO", regex: "PO" },
+	{ value: "", name: "Order Date", regex: "Order Date" },
+	{ value: "", name: "On Hold", regex: "On Hold" },
+	{ value: "", name: "Order Type", regex: "Order Type" },
+	{ value: "", name: "From Multiple Quotes", regex: "From Multiple Quotes" },
+	{ value: "", name: "Ship-To Location", regex: "ship( )?to( location)?" },
+	{ value: "", name: "Location", regex: "Location" },
+	
+	{ value: "", name: "Delivery By", regex: "del(iver)?y? ?(By)?" },
+	
+	{ value: "", name: "Exp. Ship Date", regex: "(Exp(ected)? )?Ship( )?(Date|Day)?" },
+	{ value: "", name: "Calc Tax", regex: "Calc Tax" },
+	{ value: "", name: "Ship Via", regex: "Ship Via" },
+	{ value: "", name: "???", regex: "z y x" },
+	{ value: "", name: "Tracking No", regex: "Track(ing)?" },
+	{ value: "", name: "Description", regex: "Desc(ription)?" },
+	{ value: "", name: "Reference", regex: "Ref(erence)?" },
+]
+
 ;==============================================================================
 ;==================================== GUI =====================================
 ;==============================================================================
 
 myGui := Gui("+0x40000 +E0x08000000 +ToolWindow +AlwaysOnTop +Resize") ; resizable
-WinSetTransparent(250, myGui)
+;WinSetTransparent(230, myGui)
 myGui.MarginX := 10
 myGui.MarginY := 10
 MyGui.SetFont(, "Arial")
 myGui.SetFont(, "Verdana")
 
-myTabs := myGui.Add("Tab3", "w" . WINDOW_WIDTH - 20 . " h" . TAB_HEIGHT, ["main", ""])
+myTabs := myGui.Add("Tab3", "Choose2 w" . WINDOW_WIDTH - 20 . " h" . TAB_HEIGHT, ["data", "order", "item"])
+
+;================ Tab 1 ================
 myTabs.UseTab(1)
 
 ;==== First Button
@@ -35,10 +62,22 @@ btn2 := myGui.AddButton("xs w70 h30 Section", "Down Data")
 btn2.OnEvent("Click", (*) => pasteClipboard("{down}"))
 
 myGui.SetFont("s7 norm cBlue")
-text1 := myGui.AddText("yp w180 r2", "paste clipboard with [DownKey]s inbetween each value")
+text2 := myGui.AddText("yp w180 r2", "paste clipboard with [DownKey]s inbetween each value")
 
+
+;================ Tab 2 ================
+myTabs.UseTab(2)
+
+myGui.SetFont("s8 bold cBlack")
+btn3 := myGui.AddButton("w100 h30 Section", "Enter Order Data")
+btn3.OnEvent("Click", onEnterOrderData)
+myGui.SetFont("s8 norm cBlue")
+text3 := myGui.AddText("yp w150 r2", "testing out entering order data")
+
+capturedText := myGui.AddText("xs w200 h100 r4", "")
+
+;============== Below Tab ==============
 myTabs.UseTab()
-
 
 myGui.SetFont("s6 cBlack")
 myBtn := myGui.AddButton("x200 y140 w55 h25 Section y" . TAB_HEIGHT + 15, "Read Clipboard")
@@ -96,6 +135,32 @@ printClipboard(*) {
 	clip_2 := RegExReplace(clip_1, "(`r`n)[`r`n]+", "${1}")
 	editBox.Value := clip_2
 	refreshStats()
+
+	if(myTabs.Value = 2) {
+		collectOrderData()
+	}
+}
+
+collectOrderData(*) {
+	copy := editBox.Value
+	prefix := "(?i)"
+	suffix := "[`t`n](?<nr>[^`t`n]+)"
+
+	for index, item in orderData {
+		found := RegExMatch(editBox.Value, prefix . item.regex . suffix, &SubPat)
+		if(found > 0) {
+			item.value := SubPat.nr
+		} else {
+			item.value := ""
+		}
+	}
+
+	out := ""
+	for index, item in orderData {
+		out .= (item.value = "") ? "" : item.name . ": " . item.value . "`n"
+	}
+	capturedText.value := out
+	editBox.value := copy
 }
 
 refreshStats(*) {
@@ -112,7 +177,9 @@ refreshStats(*) {
 	num_rows := lines.Length
 	num_cols := max_tabs + 1
 
-	statusBar.SetText("  " . num_rows . " rows x " . num_cols . " cols")
+	row_txt := num_rows . ((num_rows > 1) ? " rows" : " row")
+	col_txt := num_cols . ((num_cols > 1) ? " cols" : " col")
+	statusBar.SetText("  " . row_txt . " x " . col_txt)
 }
 
 pasteClipboard(key) {
@@ -129,4 +196,25 @@ pasteClipboard(key) {
 		Sleep(10)
 	}
 	editBox.Value := copy
+}
+
+onEnterOrderData(*) {
+	for index, item in orderData {
+		if GetKeyState("ESC", "P")
+			break
+		if (item.value != "") {
+			Send(item.value)
+			Sleep(10)
+		}
+		if(index != orderData.Length) {
+			Send("{tab}")
+		}
+		Sleep(200)
+		if(item.name = "Customer No") {
+			sleep(1000)
+		}
+		if(FALSE) {
+			Sleep(500)
+		}
+	}
 }
