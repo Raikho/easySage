@@ -41,7 +41,7 @@ myGui.MarginY := 10
 MyGui.SetFont(, "Arial")
 myGui.SetFont(, "Verdana")
 
-myTabs := myGui.Add("Tab3", "Choose2 w" . WINDOW_WIDTH - 20 . " h" . TAB_HEIGHT, ["data", "order", "item"])
+myTabs := myGui.Add("Tab3", "Choose1 w" . WINDOW_WIDTH - 20 . " h" . TAB_HEIGHT, ["data", "order", "item"])
 
 ;================ Tab 1 ================
 myTabs.UseTab(1)
