@@ -1,4 +1,3 @@
-
 <h4 style="color:blue">This AutoHotkey tool is an easier way to input bulk data into Sage</h4>
 
 ---
@@ -25,10 +24,7 @@
 
 <br>
 
-&emsp;
-<img width="284" height="176" alt="easySage copy example" src="https://github.com/user-attachments/assets/56427021-25e3-4624-a0f3-3f0b0ffb7ab0" />
-&emsp;&emsp;
-<img width="283" height="385" alt="easySage order UI" src="https://github.com/user-attachments/assets/9dabc28c-8075-4c5a-adf7-955c7ca07ee9" />
+<img width="638" height="423" alt="easySage order UI" src="https://github.com/user-attachments/assets/347d025f-6d0f-43be-a54c-8ff95f08e28c" />
 
 <br><br>
 
