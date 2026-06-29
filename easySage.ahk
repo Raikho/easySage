@@ -41,7 +41,7 @@ myGui.MarginY := 10
 MyGui.SetFont(, "Arial")
 myGui.SetFont(, "Verdana")
 
-myTabs := myGui.Add("Tab3", "Choose4 w" . WINDOW_WIDTH - 20 . " h" . TAB_HEIGHT, ["data", "order", "item", "settings"])
+myTabs := myGui.Add("Tab3", "Choose2 w" . WINDOW_WIDTH - 20 . " h" . TAB_HEIGHT, ["data", "order", "item", "settings"])
 
 ;================ Tab 1 - DATA ================
 myTabs.UseTab(1)
@@ -215,10 +215,19 @@ pasteClipboard(key) {
 onEnterOrderData(*) {
 	progressBar.Value := 10
 	progressBar.Visible := true
-	
+	progressBar.Opt("cBlue")
+
+	startingWinID := WinGetID("A")
+
 	for index, item in orderData {
-		if GetKeyState("ESC", "P")
-			break
+		if(WinGetID("A") != startingWinID) {
+			progressBar.value := 0
+			return 
+		}
+		if GetKeyState("ESC", "P") {
+			progressBar.value := 0
+			return
+		}
 		if (item.value != "") {
 			Send(item.value)
 			Sleep(10)
@@ -240,4 +249,15 @@ onEnterOrderData(*) {
 		progressBar.Value := 30 + 70 * (index / orderData.Length)
 	}
 	progressBar.Visible := false
+}
+
+$^F12::{
+	out := "The window ID is: " . WinGetID("A")
+	out .= "`nThe Window Title is: " . WinGetTitle("A")
+	if (CaretGetPos(&x, &y)) {
+		out .= "`nCaret positions: " . x . ", " . y
+	}
+	ToolTip(out)
+	sleep(1200)
+	ToolTip("")
 }
