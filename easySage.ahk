@@ -1,7 +1,7 @@
 #Requires AutoHotkey v2.0
 #SingleInstance force
 
-debug := true
+debug := false
 WINDOW_WIDTH := 285
 WINDOW_HEIGHT := 355
 TAB_HEIGHT := 150
@@ -9,26 +9,26 @@ WINDOW_X := debug ? -600 : 0
 WINDOW_Y := debug ? 20 : 0
 
 orderData := [
-	{ value: "", name: "Customer No", regex: "cust(omer)?" },
-	{ value: "", name: "Inquiry", regex: "Inquiry" },
-	{ value: "", name: "Last Shipment", regex: "Last Shipment" },
-	{ value: "", name: "Last Invoice", regex: "Last Invoice" },
-	{ value: "", name: "Template Code", regex: "Template Code" },
-	{ value: "", name: "PO", regex: "p(urchase)?o(rder)?" },
-	{ value: "", name: "Order Date", regex: "order ?(date|day)" },
-	{ value: "", name: "On Hold", regex: "On Hold" },
-	{ value: "", name: "Order Type", regex: "Order Type" },
-	{ value: "", name: "From Multiple Quotes", regex: "From Multiple Quotes" },
-	{ value: "", name: "Ship-To Location", regex: "ship ?((to)? ?|loc(ation)?)" },
-	{ value: "", name: "Location", regex: "[^ship ]loc(ation)?" },
-	{ value: "", name: "Delivery By", regex: "del(iver)?y? ?(By)?" },
-	{ value: "", name: "Exp. Ship Date", regex: "(exp(ected)? )?ship( )?(date|day|by)?" },
-	{ value: "", name: "Calc Tax", regex: "Calc Tax" },
-	{ value: "", name: "Ship Via", regex: "(ship )?via" },
-	{ value: "", name: "Empty Box", regex: "empty box" },
-	{ value: "", name: "Tracking No", regex: "track(ing)?" },
-	{ value: "", name: "Description", regex: "desc(ription)?" },
-	{ value: "", name: "Reference", regex: "ref(erence)?" },
+	{ value: "", time: 20, name: "Customer No", regex: "cust(omer)?" },
+	{ value: "", time:  1, name: "Inquiry", regex: "Inquiry" },
+	{ value: "", time:  1, name: "Last Shipment", regex: "Last Shipment" },
+	{ value: "", time:  1, name: "Last Invoice", regex: "Last Invoice" },
+	{ value: "", time:  1, name: "Template Code", regex: "Template Code" },
+	{ value: "", time:  1, name: "PO", regex: "p(urchase)?o(rder)?" },
+	{ value: "", time:  1, name: "Order Date", regex: "order ?(date|day)" },
+	{ value: "", time:  1, name: "On Hold", regex: "On Hold" },
+	{ value: "", time:  1, name: "Order Type", regex: "Order Type" },
+	{ value: "", time:  1, name: "From Multiple Quotes", regex: "From Multiple Quotes" },
+	{ value: "", time:  7, name: "Ship-To Location", regex: "ship ?((to)? ?|loc(ation)?)" },
+	{ value: "", time:  1, name: "Location", regex: "[^ship ]loc(ation)?" },
+	{ value: "", time:  1, name: "Delivery By", regex: "del(iver)?y? ?(By)?" },
+	{ value: "", time:  1, name: "Exp. Ship Date", regex: "(exp(ected)? )?ship( )?(date|day|by)?" },
+	{ value: "", time:  1, name: "Calc Tax", regex: "Calc Tax" },
+	{ value: "", time:  1, name: "Ship Via", regex: "(ship )?via" },
+	{ value: "", time:  1, name: "Empty Box", regex: "empty box" },
+	{ value: "", time:  1, name: "Tracking No", regex: "track(ing)?" },
+	{ value: "", time:  1, name: "Description", regex: "desc(ription)?" },
+	{ value: "", time:  1, name: "Reference", regex: "ref(erence)?" },
 ]
 
 ;==============================================================================
@@ -42,7 +42,7 @@ ui.MarginY := 10
 ui.SetFont("s8", "Arial")
 ui.SetFont("s8", "Verdana")
 
-default_tab := debug ? 1 : 1
+default_tab := debug ? 2 : 1
 myTabs := ui.Add("Tab3", "Choose" . default_tab . " w" . WINDOW_WIDTH - 20 . " h" . TAB_HEIGHT, ["data", "order", "item", "settings"])
 
 ;================================ TAB 1 - DATA ================================
@@ -75,11 +75,15 @@ btn3.OnEvent("Click", onEnterOrderData)
 text3 := ui.AddText("yp w150 r2", "testing out entering order data")
 text3.SetFont("s7 cBlue")
 
-progressBar := ui.AddProgress("xs ys+30 w200 h10")
+progressBar := ui.AddProgress("xs ys+30 w200 h10 Section")
 progressBar.Visible := false
 
-capturedText := ui.AddText("xs w200 h100 r4 +Right", "")
-capturedText.SetFont("s9 bold c075985")
+progressText := ui.addText("xs ys+10 w200 h15 Section", "Customer: xxxx")
+progressText.SetFont("s8 cBlue", "Consolas")
+progressText.Visible := false
+
+capturedText := ui.AddText("xs ys+15 w200 h100 r6 +Right", "")
+capturedText.SetFont("s7 c075985", "Consolas")
 
 ;================================ TAB 3 - ITEM ================================
 myTabs.UseTab(3)
@@ -88,9 +92,7 @@ myTabs.UseTab(3)
 ;============================== TAB 4 - SETTINGS ==============================
 myTabs.UseTab(4)
 ui.AddText("Section", "Delay (ms) :"),
-delay := ui.AddEdit("ys w50 h20 Number Limit4", 200),
-ui.AddText("xs Section", "Special Delay (ms):"),
-delay2 := ui.AddEdit("ys w50 h20 Number Limit4", 1000),
+delay := ui.AddEdit("ys w50 h20 Number Limit4", 100),
 
 ;=============================== CLIPBOARD AREA ===============================
 myTabs.UseTab()
@@ -217,43 +219,40 @@ pasteClipboard(key) {
 onEnterOrderData(*) {
 	progressBar.Value := 10
 	progressBar.Visible := true
+	progressText.Visible := true
 	progressBar.Opt("cBlue")
-
 	startingWinID := WinGetID("A")
 
+	timeSegments := 0
+	for i, x in orderData {
+		timeSegments += x.time
+	}
+	tick := 100 / timeSegments
+
 	for index, item in orderData {
-		if(WinGetID("A") != startingWinID) {
+		if(WinGetID("A") != startingWinID || GetKeyState("ESC", "P")) {
 			progressBar.value := 0
-			return 
+			break
 		}
-		if GetKeyState("ESC", "P") {
-			progressBar.value := 0
-			return
-		}
+		progressText.value := item.name . ": " . item.value
+
 		if (item.value != "") {
 			Send(item.value)
+			progressText.SetFont("cBlue")
 			Sleep(10)
+		} else {
+			progressText.SetFont("cGray")
 		}
 		if(index != orderData.Length) {
 			Send("{tab}")
+			Loop item.time {
+				Sleep(delay.value)
+				progressBar.Value += tick
+			}
 		}
-		Sleep(delay.value)
-		if(item.name = "Customer No") {
-			sleep(delay.value)
-			progressBar.Value := 20
-			sleep(delay.value)
-			progressBar.value := 30
-			sleep(delay2.value)
-		}
-		if(item.name = "Ship-To Location") {
-			sleep(delay2.value)
-		}
-		if(FALSE) {
-			Sleep(delay2.value)
-		}
-		progressBar.Value := 30 + 70 * (index / orderData.Length)
 	}
 	progressBar.Visible := false
+	progressText.Visible := false
 }
 
 ;==============================================================================
