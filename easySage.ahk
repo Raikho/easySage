@@ -91,8 +91,9 @@ myTabs.UseTab(3)
 
 ;============================== TAB 4 - SETTINGS ==============================
 myTabs.UseTab(4)
-ui.AddText("Section", "Delay (ms) :"),
+ui.AddText("Section", "Delay (ms):"),
 delay := ui.AddEdit("ys w50 h20 Number Limit4", 100),
+delayUpDown := ui.AddUpDown("Range20-3000", 100)
 
 ;=============================== CLIPBOARD AREA ===============================
 myTabs.UseTab()
