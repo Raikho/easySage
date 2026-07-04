@@ -1,11 +1,12 @@
 #Requires AutoHotkey v2.0
 #SingleInstance force
 
+debug := true
 WINDOW_WIDTH := 285
 WINDOW_HEIGHT := 355
 TAB_HEIGHT := 150
-WINDOW_X := 0
-WINDOW_Y := 0
+WINDOW_X := debug ? -600 : 0
+WINDOW_Y := debug ? 20 : 0
 
 orderData := [
 	{ value: "", name: "Customer No", regex: "cust(omer)?" },
@@ -34,79 +35,81 @@ orderData := [
 ;==================================== GUI =====================================
 ;==============================================================================
 
-myGui := Gui("+0x40000 +E0x08000000 +ToolWindow +AlwaysOnTop +Resize") ; resizable
-;WinSetTransparent(230, myGui)
-myGui.MarginX := 10
-myGui.MarginY := 10
-MyGui.SetFont(, "Arial")
-myGui.SetFont(, "Verdana")
+ui := Gui("+0x40000 +E0x08000000 +ToolWindow +AlwaysOnTop +Resize") ; resizable
+;WinSetTransparent(230, ui)
+ui.MarginX := 10
+ui.MarginY := 10
+ui.SetFont("s8", "Arial")
+ui.SetFont("s8", "Verdana")
 
-myTabs := myGui.Add("Tab3", "Choose2 w" . WINDOW_WIDTH - 20 . " h" . TAB_HEIGHT, ["data", "order", "item", "settings"])
+default_tab := debug ? 1 : 1
+myTabs := ui.Add("Tab3", "Choose" . default_tab . " w" . WINDOW_WIDTH - 20 . " h" . TAB_HEIGHT, ["data", "order", "item", "settings"])
 
-;================ Tab 1 - DATA ================
+;================================ TAB 1 - DATA ================================
 myTabs.UseTab(1)
 
-;==== First Button
-myGui.SetFont("s8 bold cBlack")
-btn1 := myGui.AddButton("w70 h30 Section", "Tab Data")
+;==== DATA WITH TABS
+btn1 := ui.AddButton("w70 h30 Section", "Tab Data")
+btn1.SetFont("bold")
 btn1.OnEvent("Click", (*) => pasteClipboard("{tab}"))
 
-myGui.SetFont("s8 norm cBlue")
-text1 := myGui.AddText("yp w180 r2", "paste clipboard with [Tab]s inbetween each value")
+text1 := ui.AddText("yp w180 r2", "paste clipboard with [Tab]s inbetween each value")
+text1.setFont("s7 cBlue")
 
-;==== Second Button
-myGui.SetFont("s8 bold cBlack")
-btn2 := myGui.AddButton("xs w70 h30 Section", "Down Data")
+;==== DATA WITH DOWN ARROW
+btn2 := ui.AddButton("xs w70 h30 Section", "Down Data")
+btn2.SetFont("bold")
 btn2.OnEvent("Click", (*) => pasteClipboard("{down}"))
 
-myGui.SetFont("s7 norm cBlue")
-text2 := myGui.AddText("yp w180 r2", "paste clipboard with [DownKey]s inbetween each value")
+text2 := ui.AddText("yp w180 r2", "paste clipboard with [DownKey]s inbetween each value")
+text2.setFont("s7 cBlue")
 
 
-;================ Tab 2 - ORDER ================
+;=============================== TAB 2 - ORDER ================================
 myTabs.UseTab(2)
 
-myGui.SetFont("s8 bold cBlack")
-btn3 := myGui.AddButton("w100 h30 Section", "Enter Order Data")
+btn3 := ui.AddButton("w100 h30 Section", "Enter Order Data")
+btn3.SetFont("bold")
 btn3.OnEvent("Click", onEnterOrderData)
-myGui.SetFont("s8 norm cBlue")
-text3 := myGui.AddText("yp w150 r2", "testing out entering order data")
 
-progressBar := myGui.AddProgress("xs ys+30 w200 h10")
+text3 := ui.AddText("yp w150 r2", "testing out entering order data")
+text3.SetFont("s7 cBlue")
+
+progressBar := ui.AddProgress("xs ys+30 w200 h10")
 progressBar.Visible := false
 
-myGui.SetFont("s9 bold c075985")
-capturedText := myGui.AddText("xs w200 h100 r4 +Right", "")
+capturedText := ui.AddText("xs w200 h100 r4 +Right", "")
+capturedText.SetFont("s9 bold c075985")
 
-;================ Tab 3 - ITEM ================
+;================================ TAB 3 - ITEM ================================
 myTabs.UseTab(3)
 
 
-;================ Tab 4 - SETTINGS ================
+;============================== TAB 4 - SETTINGS ==============================
 myTabs.UseTab(4)
-myGui.AddText("Section", "Delay (ms) :"),
-delay := myGui.AddEdit("ys w50 h20 Number Limit4", 200),
-myGui.AddText("xs Section", "Special Delay (ms):"),
-delay2 := myGui.AddEdit("ys w50 h20 Number Limit4", 1000),
+ui.AddText("Section", "Delay (ms) :"),
+delay := ui.AddEdit("ys w50 h20 Number Limit4", 200),
+ui.AddText("xs Section", "Special Delay (ms):"),
+delay2 := ui.AddEdit("ys w50 h20 Number Limit4", 1000),
 
-;============== Below Tab ==============
+;=============================== CLIPBOARD AREA ===============================
 myTabs.UseTab()
 
-myGui.SetFont("s6 norm cBlack")
-myBtn := myGui.AddButton("x200 y140 w55 h25 Section y" . TAB_HEIGHT + 15, "Read Clipboard")
+ui.SetFont("s6 norm cBlack")
+myBtn := ui.AddButton("x200 y140 w55 h25 Section y" . TAB_HEIGHT + 15, "Read Clipboard")
 myBtn.OnEvent("Click", printClipboard)
 
-myGui.SetFont("s12")
-myGui.AddText("x5 yp+5 Section", "Clipboard contents:")
+ui.SetFont("s12")
+ui.AddText("x5 yp+5 Section", "Clipboard contents:")
 
-myGui.SetFont("s10")
-editBox := myGui.AddEdit("xs+0 y+0 Multi ReadOnly VScroll HScroll w270 h140", "")
+ui.SetFont("s10")
+editBox := ui.AddEdit("xs+0 y+0 Multi ReadOnly VScroll HScroll w270 h140", "")
 editBox.Opt("BackgroundBFDBFE")
 
-statusBar := mygui.AddStatusBar()
+statusBar := ui.AddStatusBar()
 statusBar.SetText("")
 
-myGui.Show(Format("w{1} h{2} x{3} y{4}", WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_X, WINDOW_Y))
+ui.Show(Format("w{1} h{2} x{3} y{4}", WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_X, WINDOW_Y))
 getStartingClipboard()
 
 ;==============================================================================
@@ -114,9 +117,8 @@ getStartingClipboard()
 ;==============================================================================
 
 OnClipboardChange onClipChanged
-myGui.OnEvent("Size", onWindowResized)
-myGui.OnEvent("Close", (*) => ExitApp())
-
+ui.OnEvent("Size", onWindowResized)
+ui.OnEvent("Close", (*) => ExitApp())
 
 ;==============================================================================
 ;================================= FUNCTIONS ==================================
@@ -243,6 +245,9 @@ onEnterOrderData(*) {
 			progressBar.value := 30
 			sleep(delay2.value)
 		}
+		if(item.name = "Ship-To Location") {
+			sleep(delay2.value)
+		}
 		if(FALSE) {
 			Sleep(delay2.value)
 		}
@@ -250,6 +255,10 @@ onEnterOrderData(*) {
 	}
 	progressBar.Visible := false
 }
+
+;==============================================================================
+;================================== MISC ======================================
+;==============================================================================
 
 $^F12::{
 	out := "The window ID is: " . WinGetID("A")
