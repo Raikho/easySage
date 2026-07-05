@@ -42,7 +42,7 @@ ui.MarginY := 10
 ui.SetFont("s8", "Arial")
 ui.SetFont("s8", "Verdana")
 
-default_tab := debug ? 2 : 1
+default_tab := debug ? 1 : 1
 myTabs := ui.Add("Tab3", "Choose" . default_tab . " w" . WINDOW_WIDTH - 20 . " h" . TAB_HEIGHT, ["data", "order", "item", "settings"])
 
 ;================================ TAB 1 - DATA ================================
@@ -98,6 +98,8 @@ delayUpDown := ui.AddUpDown("Range20-3000", 100)
 ;=============================== CLIPBOARD AREA ===============================
 myTabs.UseTab()
 
+
+
 ui.SetFont("s6 norm cBlack")
 myBtn := ui.AddButton("x200 y140 w55 h25 Section y" . TAB_HEIGHT + 15, "Read Clipboard")
 myBtn.OnEvent("Click", printClipboard)
@@ -105,9 +107,23 @@ myBtn.OnEvent("Click", printClipboard)
 ui.SetFont("s12")
 ui.AddText("x5 yp+5 Section", "Clipboard contents:")
 
+;=========================================================================================
+;================================ LIST TEST ===================================
+; TODO: list test
+list := ui.Add("ListView", "x10 y195 w270 h140 NoSortHdr Grid", ["1", "2", "3", "4"])
+list.Opt("BackgroundBFDBFE")
+
+grid := [[]]
+max_rows := 0
+max_cols := 0
+
+;================================ LIST TEST ===================================
+;=========================================================================================
+
 ui.SetFont("s10")
 editBox := ui.AddEdit("xs+0 y+0 Multi ReadOnly VScroll HScroll w270 h140", "")
 editBox.Opt("BackgroundBFDBFE")
+editBox.Visible := false
 
 statusBar := ui.AddStatusBar()
 statusBar.SetText("")
@@ -150,14 +166,53 @@ onWindowResized(guiObject, eventInfo, width, height) {
 }
 
 printClipboard(*) {
-	clip_1 := RegExReplace(A_Clipboard, "[ ,$]", "")
-	clip_2 := RegExReplace(clip_1, "(`r`n)[`r`n]+", "${1}")
-	editBox.Value := clip_2
-	refreshStats()
+	clip_1 := RegExReplace(A_Clipboard, "[,$]", "") ; commas, dollar signs
+	clip_2 := RegExReplace(clip_1, "(`r`n)[`r`n]+", "${1}") ; replaces double newlines with single
+	popualteGrid(clip_2)
+	populateList(grid)
+	;editBox.Value := clip_2
+	;refreshStats()
 
 	if(myTabs.Value = 2) {
 		collectOrderData()
 	}
+}
+
+popualteGrid(clipboard_str) {
+	global grid := StrSplit(clipboard_str, "`n", "`r")
+	if(StrLen(grid[-1]) = 0) {
+		grid.Pop()
+	}
+
+	for i, row in grid {
+		grid[i] := []
+		for j, col in StrSplit(row, "`t") {
+			if (col != "") {
+				grid[i].Push(col)
+			}
+		}
+	}
+	refreshStats()
+}
+
+refreshStats(*) {
+	global max_rows := grid.Length
+	global max_cols := 0
+	for i, row in grid {
+		cols := row.Length
+		max_cols := cols > max_cols ? cols : max_cols
+	}
+	row_txt := max_rows . ((max_rows > 1) ? " rows" : " row")
+	col_txt := max_cols . ((max_cols > 1) ? " cols" : " col")
+	statusBar.SetText("  " . row_txt . " x " . col_txt)
+}
+
+populateList(arr) {
+	list.Delete() 
+	for i, row in arr {
+		list.Add(, row*)
+	}
+	list.ModifyCol()
 }
 
 collectOrderData(*) {
@@ -182,39 +237,21 @@ collectOrderData(*) {
 	editBox.value := copy
 }
 
-refreshStats(*) {
-	lines := StrSplit(editBox.value, "`n", "`r")
-	IF(StrLen(lines[-1]) = 0) {
-		lines.Pop()
-	}
-
-	max_tabs := 0
-	for index, line in lines {
-		RegExReplace(line, "`t",, &num_tabs)
-		max_tabs := (num_tabs > max_tabs) ? num_tabs : max_tabs 
-	}
-	num_rows := lines.Length
-	num_cols := max_tabs + 1
-
-	row_txt := num_rows . ((num_rows > 1) ? " rows" : " row")
-	col_txt := num_cols . ((num_cols > 1) ? " cols" : " col")
-	statusBar.SetText("  " . row_txt . " x " . col_txt)
-}
-
 pasteClipboard(key) {
-	copy := editBox.Value
-	arr := StrSplit(editBox.Value, [A_TAB, "`n"])
-	for field in arr {
-		if GetKeyState("ESC", "P")
-			break
-		if (field = "")
-			continue
-		Send(field)
-		Sleep(10)
-		Send(key)
-		Sleep(10)
+	for i, row in grid {
+		for j, cell in row {
+			if GetKeyState("ESC", "P") {
+				break
+			}
+			if (cell = "") {
+				continue
+			}
+			send(cell)
+			Sleep(10)
+			send (key)
+			Sleep(10)
+		}
 	}
-	editBox.Value := copy
 }
 
 onEnterOrderData(*) {
