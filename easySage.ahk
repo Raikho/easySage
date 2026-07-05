@@ -42,7 +42,7 @@ ui.MarginY := 10
 ui.SetFont("s8", "Arial")
 ui.SetFont("s8", "Verdana")
 
-default_tab := debug ? 1 : 1
+default_tab := debug ? 2 : 1
 myTabs := ui.Add("Tab3", "Choose" . default_tab . " w" . WINDOW_WIDTH - 20 . " h" . TAB_HEIGHT, ["data", "order", "item", "settings"])
 
 ;================================ TAB 1 - DATA ================================
@@ -98,8 +98,6 @@ delayUpDown := ui.AddUpDown("Range20-3000", 100)
 ;=============================== CLIPBOARD AREA ===============================
 myTabs.UseTab()
 
-
-
 ui.SetFont("s6 norm cBlack")
 myBtn := ui.AddButton("x200 y140 w55 h25 Section y" . TAB_HEIGHT + 15, "Read Clipboard")
 myBtn.OnEvent("Click", printClipboard)
@@ -107,24 +105,17 @@ myBtn.OnEvent("Click", printClipboard)
 ui.SetFont("s12")
 ui.AddText("x5 yp+5 Section", "Clipboard contents:")
 
-;=========================================================================================
-;================================ LIST TEST ===================================
-; TODO: list test
-list := ui.Add("ListView", "x10 y195 w270 h140 NoSortHdr Grid", ["1", "2", "3", "4"])
+
+list := ui.Add("ListView", "x10 y195 w265 h133 NoSortHdr Grid ReadOnly Count20 -Hdr -LV0x20", ["", "", "", "", ""])
 list.Opt("BackgroundBFDBFE")
+list.SetFont("s8")
 
 grid := [[]]
 max_rows := 0
 max_cols := 0
 
-;================================ LIST TEST ===================================
-;=========================================================================================
 
 ui.SetFont("s10")
-editBox := ui.AddEdit("xs+0 y+0 Multi ReadOnly VScroll HScroll w270 h140", "")
-editBox.Opt("BackgroundBFDBFE")
-editBox.Visible := false
-
 statusBar := ui.AddStatusBar()
 statusBar.SetText("")
 
@@ -151,7 +142,7 @@ getStartingClipboard(*) {
 
 onClipChanged(DataType) {
 	if (DataType != 1) {
-		editBox.value := ""
+		global grid := [[]]
 		statusBar.SetText("")
 		return
 	}
@@ -159,8 +150,8 @@ onClipChanged(DataType) {
 }
 
 onWindowResized(guiObject, eventInfo, width, height) {
-	editBox.GetPos(&x, &y)
-	editBox.Move(x, y, width - x - 10, height - y - 27)
+	list.GetPos(&x, &y)
+	list.Move(x, y, width - x - 10, height - y - 27)
 	MyTabs.GetPos(&tx, &ty)
 	MyTabs.Move(tx, ty, width - 20)
 }
@@ -208,33 +199,59 @@ refreshStats(*) {
 }
 
 populateList(arr) {
-	list.Delete() 
+	list.Opt("-Redraw")
+	list.Delete()
+
+	col_count := list.GetCount("Col")
+
+	if (max_cols > col_count) {
+		diff := max_cols - col_count
+		tooltip("col_count: " . col_count . ", max: " . max_cols . ", diff: ", diff)
+		Loop diff {
+			list.InsertCol()
+		}
+	} else if (max_cols < col_count) {
+		i := 0
+		while (i <= max_cols && col_count - i > 4) {
+			list.DeleteCol(col_count - i)
+			i++
+		}
+	}
+
 	for i, row in arr {
 		list.Add(, row*)
 	}
 	list.ModifyCol()
+	list.Opt("+Redraw")
 }
 
 collectOrderData(*) {
-	copy := editBox.Value
-	prefix := "(?i)"
-	suffix := "[`t`n: ](?<nr>[^`t`n]+)"
-
-	for index, item in orderData {
-		found := RegExMatch(editBox.Value, prefix . item.regex . suffix, &SubPat)
-		if(found > 0) {
-			item.value := SubPat.nr
-		} else {
-			item.value := ""
+	flat_array := []
+	for i, row in grid {
+		for j, cell in row {
+			flat_array.Push(cell)
 		}
 	}
 
+	prefix := "(?i)"
+	;suffix := "[`t`n: ](?<nr>[^`t`n]+)"
+	for i, item in orderData {
+		for j, cell in flat_array {
+			found := RegExMatch(cell, prefix . item.regex, &subpat)
+			if (found > 0 && j < flat_array.Length) {
+				next_cell := flat_array[j + 1]
+				item.value := next_cell
+				continue 2
+			}
+		}
+		item.value := ""
+	}
+
 	out := ""
-	for index, item in orderData {
+	for i, item in orderData {
 		out .= (item.value = "") ? "" : item.name . ": " . item.value . "`n"
 	}
 	capturedText.value := out
-	editBox.value := copy
 }
 
 pasteClipboard(key) {
