@@ -95,6 +95,10 @@ ui.AddText("Section", "Delay (ms):"),
 delay := ui.AddEdit("ys w50 h20 Number Limit4", 100),
 delayUpDown := ui.AddUpDown("Range20-3000", 100)
 
+ui.AddText("Section xs", "Delay for first tab (ms):"),
+delay2 := ui.AddEdit("ys w50 h20 Number Limit4", 10),
+delayUpDown2 := ui.AddUpDown("Range1-999", 10)
+
 ;=============================== CLIPBOARD AREA ===============================
 myTabs.UseTab()
 
@@ -245,6 +249,7 @@ collectOrderData(*) {
 			}
 		}
 		item.value := ""
+
 	}
 
 	out := ""
@@ -264,9 +269,9 @@ pasteClipboard(key) {
 				continue
 			}
 			send(cell)
-			Sleep(10)
+			Sleep(delay2.value)
 			send (key)
-			Sleep(10)
+			Sleep(delay2.value)
 		}
 	}
 }
