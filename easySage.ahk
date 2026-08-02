@@ -67,6 +67,8 @@ btn2.OnEvent("Click", (*) => pasteClipboard("{down}"))
 text2 := ui.AddText("yp w180 r2", "paste clipboard with [DownKey]s inbetween each value")
 text2.setFont("s7 cBlue")
 
+dataProgress := ui.AddProgress("xs ys+63 w200 h10 Section")
+dataProgress.Visible := False
 
 ;=============================== TAB 2 - ORDER ================================
 myTabs.UseTab(2)
@@ -264,21 +266,50 @@ collectOrderData(*) {
 	capturedText.value := out
 }
 
+getNumGridEntries(*) {
+	num_entries := 0
+	for i, row in grid
+		for j, cell in row
+			if (cell != "")
+				num_entries++
+	return num_entries
+}
+
+
 pasteClipboard(key) {
+	dataProgress.Value := 0
+	progress := 0
+	num_entries := getNumGridEntries()
+	if (num_entries == 0) {
+		return
+	}
+	tick := 100 / num_entries
+	dataProgress.Opt("c50C878")
+	dataProgress.Visible := true
+
 	for i, row in grid {
 		for j, cell in row {
 			if GetKeyState("ESC", "P") {
-				break
+				dataProgress.Opt("cRed")
+				SetTimer(() => dataProgress.Visible := false, -5000)
+				return
 			}
 			if (cell = "") {
 				continue
 			}
 			send(cell)
+			progress += tick / 2
+			dataProgress.value := Round(progress)
 			Sleep(data_delay.value)
+
 			send (key)
+			progress += tick / 2
+			dataProgress.value := Round(progress)
 			Sleep(data_delay.value)
 		}
 	}
+	dataProgress.Opt("c22FF00")
+    SetTimer(() => dataProgress.Visible := false, -5000)
 }
 
 onEnterOrderData(*) {
