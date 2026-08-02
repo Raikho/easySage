@@ -1,4 +1,4 @@
-#Requires AutoHotkey v2.0
+#REQUIRES AutoHotkey v2.0
 #SingleInstance force
 
 debug := false
@@ -11,7 +11,7 @@ WINDOW_Y := debug ? 20 : 0
 orderData := [
 	{ value: "", time: 20, name: "Customer No", regex: "cust(omer)?" },
 	{ value: "", time:  1, name: "Inquiry", regex: "Inquiry" },
-	{ value: "", time:  1, name: "Last Shipment", regex: "Last Shipment" },
+	{ VALUE: "", TIME:  1, name: "Last Shipment", regex: "Last Shipment" },
 	{ value: "", time:  1, name: "Last Invoice", regex: "Last Invoice" },
 	{ value: "", time:  1, name: "Template Code", regex: "Template Code" },
 	{ value: "", time:  1, name: "PO", regex: "p(urchase)?o(rder)?" },
@@ -19,10 +19,10 @@ orderData := [
 	{ value: "", time:  1, name: "On Hold", regex: "On Hold" },
 	{ value: "", time:  1, name: "Order Type", regex: "Order Type" },
 	{ value: "", time:  1, name: "From Multiple Quotes", regex: "From Multiple Quotes" },
-	{ value: "", time:  7, name: "Ship-To Location", regex: "ship ?((to)? ?|loc(ation)?)" },
+	{ value: "", time:  7, name: "Ship-To Location", regex: "(ship loc|ship to|ship to loc|shipto)" },
 	{ value: "", time:  1, name: "Location", regex: "[^ship ]loc(ation)?" },
 	{ value: "", time:  1, name: "Delivery By", regex: "del(iver)?y? ?(By)?" },
-	{ value: "", time:  1, name: "Exp. Ship Date", regex: "(exp(ected)? )?ship( )?(date|day|by)?" },
+	{ value: "", time:  1, name: "Exp. Ship Date", regex: "(exp(ected)? )?ship( )?(date|day|by)" },
 	{ value: "", time:  1, name: "Calc Tax", regex: "Calc Tax" },
 	{ value: "", time:  1, name: "Ship Via", regex: "(ship )?via" },
 	{ value: "", time:  1, name: "Empty Box", regex: "empty box" },
@@ -44,6 +44,9 @@ ui.SetFont("s8", "Verdana")
 
 default_tab := debug ? 2 : 1
 myTabs := ui.Add("Tab3", "Choose" . default_tab . " w" . WINDOW_WIDTH - 20 . " h" . TAB_HEIGHT, ["data", "order", "item", "settings"])
+
+; Switching to settings tab removes the NoActivate setting on the window
+myTabs.OnEvent("Change", (t, *) => ui.Opt((t.value = 4 ? "-" : "+") . "E0x08000000"))
 
 ;================================ TAB 1 - DATA ================================
 myTabs.UseTab(1)
@@ -91,13 +94,15 @@ myTabs.UseTab(3)
 
 ;============================== TAB 4 - SETTINGS ==============================
 myTabs.UseTab(4)
-ui.AddText("Section", "Delay (ms):"),
-delay := ui.AddEdit("ys w50 h20 Number Limit4", 100),
-delayUpDown := ui.AddUpDown("Range20-3000", 100)
 
-ui.AddText("Section xs", "Delay for first tab (ms):"),
-delay2 := ui.AddEdit("ys w50 h20 Number Limit4", 10),
-delayUpDown2 := ui.AddUpDown("Range1-999", 10)
+ui.AddText("Section", "Delay for data tab (ms):"),
+data_delay := ui.AddEdit("ys w60 h20 Number Limit4", 10),
+ui.AddUpDown("Range1-999", 30)
+
+ui.AddText("Section xs", "Other Delay (ms):"),
+delay := ui.AddEdit("ys w60 h20 Number Limit4", 100),
+ui.AddUpDown("Range20-3000", 100)
+
 
 ;=============================== CLIPBOARD AREA ===============================
 myTabs.UseTab()
@@ -269,9 +274,9 @@ pasteClipboard(key) {
 				continue
 			}
 			send(cell)
-			Sleep(delay2.value)
+			Sleep(data_delay.value)
 			send (key)
-			Sleep(delay2.value)
+			Sleep(data_delay.value)
 		}
 	}
 }
