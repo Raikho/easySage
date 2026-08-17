@@ -10,25 +10,55 @@ WINDOW_Y := debug ? 20 : 0
 
 orderData := [
 	{ value: "", time: 20, name: "Customer No", regex: "cust(omer)?" },
-	{ value: "", time:  1, name: "Inquiry", regex: "Inquiry" },
-	{ VALUE: "", TIME:  1, name: "Last Shipment", regex: "Last Shipment" },
-	{ value: "", time:  1, name: "Last Invoice", regex: "Last Invoice" },
-	{ value: "", time:  1, name: "Template Code", regex: "Template Code" },
-	{ value: "", time:  1, name: "PO", regex: "p(urchase)?o(rder)?" },
-	{ value: "", time:  1, name: "Order Date", regex: "order ?(date|day)" },
-	{ value: "", time:  1, name: "On Hold", regex: "On Hold" },
-	{ value: "", time:  1, name: "Order Type", regex: "Order Type" },
-	{ value: "", time:  1, name: "From Multiple Quotes", regex: "From Multiple Quotes" },
-	{ value: "", time:  7, name: "Ship-To Location", regex: "(ship loc|ship to|ship to loc|shipto)" },
-	{ value: "", time:  1, name: "Location", regex: "[^ship ]loc(ation)?" },
-	{ value: "", time:  1, name: "Delivery By", regex: "del(iver)?y? ?(By)?" },
-	{ value: "", time:  1, name: "Exp. Ship Date", regex: "(exp(ected)? )?ship( )?(date|day|by)" },
-	{ value: "", time:  1, name: "Calc Tax", regex: "Calc Tax" },
-	{ value: "", time:  1, name: "Ship Via", regex: "(ship )?via" },
-	{ value: "", time:  1, name: "Empty Box", regex: "empty box" },
-	{ value: "", time:  1, name: "Tracking No", regex: "track(ing)?" },
-	{ value: "", time:  1, name: "Description", regex: "desc(ription)?" },
-	{ value: "", time:  1, name: "Reference", regex: "ref(erence)?" },
+	{ value: "", time:  2, name: "Inquiry", regex: "Inquiry" },
+	{ value: "", time:  2, name: "Last Shipment", regex: "Last Shipment" },
+	{ value: "", time:  2, name: "Last Invoice", regex: "Last Invoice" },
+	{ value: "", time:  6, name: "Template Code", regex: "Template( Code)?" },
+	{ value: "", time:  2, name: "PO", regex: "p(urchase)?o(rder)?" },
+	{ value: "", time:  2, name: "Order Date", regex: "order ?(date|day)" },
+	{ value: "", time:  2, name: "On Hold", regex: "On Hold" },
+	{ value: "", time:  4, name: "Order Type", regex: "Order Type" },
+	{ value: "", time:  2, name: "From Multiple Quotes", regex: "From Multiple Quotes" },
+	{ value: "", time:  6, name: "Ship-To Location", regex: "(ship loc|ship to|ship to loc|shipto)" },
+	{ value: "", time:  2, name: "Location", regex: "[^ship ]loc(ation)?" },
+	{ value: "", time:  2, name: "Delivery By", regex: "del(iver)?y? ?(By)?" },
+	{ value: "", time:  2, name: "Exp. Ship Date", regex: "(exp(ected)? )?ship( )?(date|day|by)" },
+	{ value: "", time:  2, name: "Calc Tax", regex: "Calc Tax" },
+	{ value: "", time:  2, name: "Ship Via", regex: "(ship )?via" },
+	{ value: "", time:  2, name: "Empty Box", regex: "empty box" },
+	{ value: "", time:  2, name: "Tracking No", regex: "track(ing)?" },
+	{ value: "", time:  2, name: "Description", regex: "desc(ription)?" },
+	{ value: "", time:  2, name: "Reference", regex: "ref(erence)?" },
+]
+
+itemData := [
+	{ value: "", time:  3, name: "Line Number", regex: "Line Number" },
+	{ value: "", time:  2, name: "Line Type", regex: "Line Type" },
+	{ value: "", time: 30, name: "Item Number", regex: "item" },
+	{ value: "", time:  2, name: "Inquiry", regex: "Inquiry" },
+	{ value: "", time:  2, name: "Description", regex: "Description" },
+	{ value: "", time:  2, name: "Category", regex: "Category" },
+	{ value: "", time:  2, name: "Location", regex: "Location" },
+	{ value: "", time:  2, name: "Price List", regex: "Price List" },
+	{ value: "", time:  2, name: "Exp. Ship Date", regex: "Exp. Ship Date" },
+	{ value: "", time:  8, name: "Qty. Ordered", regex: "(quantity|qty)" },
+	{ value: "", time:  2, name: "UOM", regex: "UOM" },
+	{ value: "", time:  2, name: "Delivery By", regex: "Delivery By" },
+	{ value: "", time:  2, name: "Qty. Shipped", regex: "Qty. Shipped" },
+	{ value: "", time:  2, name: "Weight UOM", regex: "Weight UOM" },
+	{ value: "", time:  2, name: "B/O", regex: "B/O" },
+	{ value: "", time:  2, name: "Qty. Committed", regex: "Qty. Committed" },
+	{ value: "", time:  6, name: "Unit Price", regex: "(unit )?price" },
+	{ value: "", time:  2, name: "Unit Weight", regex: "Unit Weight" },
+	{ value: "", time:  2, name: "Ext. Weight", regex: "Ext. Weight" },
+	{ value: "", time:  2, name: "Discount %", regex: "Discount $" },
+	{ value: "", time:  2, name: "Disc. Amt.", regex: "Disc. Amt." },
+	{ value: "", time:  2, name: "Ship Via", regex: "Ship Via" },
+	{ value: "", time:  2, name: "Ship Via Description", regex: "Ship Via Description" },
+	{ value: "", time:  2, name: "Comments/Instructions", regex: "Comments/Instructions" },
+	{ value: "", time:  2, name: "Optional Fields", regex: "Optional Fields" },
+	{ value: "", time:  2, name: "Customer Item No.", regex: "Customer Item No." },
+	{ value: "", time:  2, name: "Tracking No.", regex: "Tracking No." },
 ]
 
 ;==============================================================================
@@ -92,6 +122,23 @@ capturedText.SetFont("s7 c075985", "Consolas")
 
 ;================================ TAB 3 - ITEM ================================
 myTabs.UseTab(3)
+
+btn4 := ui.AddButton("w100 h30 Section", "Enter Item Data")
+btn4.SetFont("bold")
+btn4.OnEvent("Click", onEnterItemData)
+
+text4 := ui.AddText("yp w150 r2", "testing out entering item data")
+text4.SetFont("s7 cBlue")
+
+progressBar2 := ui.AddProgress("xs ys+30 w200 h10 Section")
+progressBar2.Visible := false
+
+progressText2 := ui.addText("xs ys+10 w200 h15 Section", "Customer: xxxx")
+progressText2.SetFont("s8 cBlue", "Consolas")
+progressText2.Visible := false
+
+capturedText2 := ui.AddText("xs ys+15 w200 h100 r6 +Right", "")
+capturedText2.SetFont("s7 c075985", "Consolas")
 
 
 ;============================== TAB 4 - SETTINGS ==============================
@@ -177,6 +224,9 @@ printClipboard(*) {
 
 	if(myTabs.Value = 2) {
 		collectOrderData()
+	}
+	if(myTabs.Value = 3) {
+		collectItemData()
 	}
 }
 
@@ -266,6 +316,36 @@ collectOrderData(*) {
 	capturedText.value := out
 }
 
+collectItemData(*) {
+	flat_array := []
+	for i, row in grid {
+		for j, cell in row {
+			flat_array.Push(cell)
+		}
+	}
+
+	prefix := "(?i)"
+	;suffix := "[`t`n: ](?<nr>[^`t`n]+)"
+	for i, item in itemData {
+		for j, cell in flat_array {
+			found := RegExMatch(cell, prefix . item.regex, &subpat)
+			if (found > 0 && j < flat_array.Length) {
+				next_cell := flat_array[j + 1]
+				item.value := next_cell
+				continue 2
+			}
+		}
+		item.value := ""
+
+	}
+
+	out := ""
+	for i, item in itemData {
+		out .= (item.value = "") ? "" : item.name . ": " . item.value . "`n"
+	}
+	capturedText2.value := out
+}
+
 getNumGridEntries(*) {
 	num_entries := 0
 	for i, row in grid
@@ -325,6 +405,7 @@ onEnterOrderData(*) {
 	}
 	tick := 100 / timeSegments
 
+
 	for index, item in orderData {
 		if(WinGetID("A") != startingWinID || GetKeyState("ESC", "P")) {
 			progressBar.value := 0
@@ -342,7 +423,7 @@ onEnterOrderData(*) {
 		if(index != orderData.Length) {
 			Send("{tab}")
 			Loop item.time {
-				Sleep(delay.value)
+				Sleep(delay.Value)
 				progressBar.Value += tick
 			}
 		}
@@ -350,6 +431,48 @@ onEnterOrderData(*) {
 	progressBar.Visible := false
 	progressText.Visible := false
 }
+
+onEnterItemData(*) {
+	progressBar2.Value := 10
+	progressBar2.Visible := true
+	progressText2.Visible := true
+	progressBar2.Opt("cBlue")
+	startingWinID := WinGetID("A")
+
+	timeSegments := 0
+	for i, x in orderData {
+		timeSegments += x.time
+	}
+	tick := 100 / timeSegments
+
+
+	for index, item in itemData {
+		if(WinGetID("A") != startingWinID || GetKeyState("ESC", "P")) {
+			progressBar2.value := 0
+			break
+		}
+		progressText2.value := item.name . ": " . item.value
+
+		if (item.value != "") {
+			Send(item.value)
+			progressText2.SetFont("cBlue")
+			Sleep(10)
+		} else {
+			progressText2.SetFont("cGray")
+		}
+		if(index != orderData.Length) {
+			Send("{tab}")
+			Loop item.time {
+				Sleep(delay.Value)
+				progressBar2.Value += tick
+			}
+		}
+	}
+	progressBar2.Visible := false
+	progressText2.Visible := false
+
+}
+
 
 ;==============================================================================
 ;================================== MISC ======================================
